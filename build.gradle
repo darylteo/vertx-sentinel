@@ -4,49 +4,44 @@ buildscript {
     mavenLocal()
   }
 
-  dependencies { classpath 'com.darylteo:vertx-gradle-plugin:1.1.0-ALPHA3' }
+  dependencies { classpath 'com.darylteo.vertx:vertx-gradle-plugin:0.1.0-SNAPSHOT' }
 }
 
-import com.darylteo.gradle.plugins.vertx.*
-
-apply plugin: 'java'
-
-apply plugin: VertxProjectPlugin
-apply plugin: VertxPublishPlugin
-apply plugin: VertxDeploymentsPlugin
+apply plugin: 'vertx'
 
 repositories {
-  maven {
-    url 'http://repo.gradle.org/gradle/libs-releases-local'
-  }
+  maven { url 'http://repo.gradle.org/gradle/libs-releases-local' }
   mavenCentral()
   mavenLocal()
 }
 
 dependencies {
-    compile "org.gradle:gradle-tooling-api:${toolingApiVersion}"
+  compile("org.gradle:gradle-tooling-api:${toolingApiVersion}")
+  compile "com.darylteo:directory-watcher:${watcherVersion}"
 }
 
 vertx {
-  version '2.0.1-final'
-  
-  module {
-    group 'com.darylteo'
-    name 'vertx-sentinel'
+  platform {
+    version '2.0.2-final'
+  }
+
+  info {
+    groupId 'com.darylteo'
+    artifactId 'vertx-sentinel'
     version '0.1.0'
   }
 
   config {
+    // flags
     autoRedeploy false
+    preserveCwd true
+    worker true
+
+    // config
     main 'com.darylteo.vertx.sentinel.MainVerticle'
   }
-}
-
-deployments {
-  version '2.0.1-final'
-  debug {
-    deploy {
-      
-    }
+  
+  deployments {
+    
   }
 }
