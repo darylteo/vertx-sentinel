@@ -9,6 +9,7 @@ import org.vertx.java.core.Future
 import com.darylteo.nio.DirectoryChangedSubscriber
 import com.darylteo.nio.DirectoryWatcher
 import com.darylteo.nio.PollingDirectoryWatchService
+import com.sun.org.apache.xpath.internal.operations.String
 
 public class MainVerticle extends Verticle {
   private Long timerId = null
@@ -18,12 +19,15 @@ public class MainVerticle extends Verticle {
 
   @Override
   public def start() {
+    def tasks = container.config.tasks ?: ['copyMod']
+    long delay = container.config.delay ?: 3000l
+
     try {
       this.projects = new ProjectContainer("")
-      this.watchService = setupWatchService(this.projects)
-      this.timerId = setupTimer()
+      this.watchService = setupWatchService(this.projects, tasks)
+      this.timerId = setupTimer(delay)
 
-      System.out.println("Vertx Gradle Sentinel Started!")
+      System.out.println("Vertx Gradle Sentinel Started")
     } catch (Exception e) {
       e.printStackTrace()
       throw new RuntimeException(e)
@@ -43,21 +47,19 @@ public class MainVerticle extends Verticle {
     super.stop()
   }
 
-  private PollingDirectoryWatchService setupWatchService(Iterable<Project> projects) throws IOException {
+  private PollingDirectoryWatchService setupWatchService(Iterable<Project> projects, def tasks) throws IOException {
     PollingDirectoryWatchService watchService = new PollingDirectoryWatchService()
 
     projects.each { Project p ->
       Path path = Paths.get(p.path)
 
-      println "Trying to create watcher at $path"
       def watcher = watchService.newWatcher(path)
       watcher.include 'src/**'
 
       watcher.subscribe(new DirectoryChangedSubscriber() {
           @Override
           public void directoryChanged(DirectoryWatcher w, Path entry) {
-            println "Change!"
-            p.run('copyMod')
+            p.run(tasks)
           }
         })
     }
@@ -66,7 +68,7 @@ public class MainVerticle extends Verticle {
   }
 
 
-  private Long setupTimer() {
-    return vertx.setPeriodic(3000, { watchService.poll() })
+  private Long setupTimer(long duration) {
+    return vertx.setPeriodic(duration, { watchService.poll() })
   }
 }

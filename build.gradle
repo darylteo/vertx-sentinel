@@ -44,7 +44,10 @@ vertx {
   
   deployments {
     mod {
-      
+      config {
+        delay 1000
+        tasks 'clean', 'copyMod'
+      }
     }
   }
 }

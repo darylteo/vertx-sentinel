@@ -11,7 +11,7 @@ public class Project {
   public String getPath() {
     def path = gProject.path
     path = path.length() > 1 ? path[1..-1] : ''
-    
+
     return path.replace(':', File.separator)
   }
 
@@ -22,6 +22,10 @@ public class Project {
   }
 
   public void run(String ... taskNames) {
+    run(taskNames)
+  }
+
+  public void run(Collection taskNames) {
     this.gBuilder.forTasks(taskNames.collect { name ->
       this.gProject.tasks.find { task ->
         task.name == name
