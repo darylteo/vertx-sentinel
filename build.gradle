@@ -23,6 +23,7 @@ dependencies {
 vertx {
   platform {
     version '2.0.2-final'
+    groovy '2.0.0-final'
   }
 
   info {
@@ -33,15 +34,17 @@ vertx {
 
   config {
     // flags
-    autoRedeploy false
+    autoRedeploy true
     preserveCwd true
     worker true
 
     // config
-    main 'com.darylteo.vertx.sentinel.MainVerticle'
+    main 'groovy:com.darylteo.vertx.sentinel.MainVerticle'
   }
   
   deployments {
-    
+    mod {
+      
+    }
   }
 }
