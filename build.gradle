@@ -7,6 +7,8 @@ buildscript {
   dependencies { classpath 'com.darylteo.vertx:vertx-gradle-plugin:0.1.0-SNAPSHOT' }
 }
 
+apply plugin: 'maven'
+apply plugin: 'signing'
 apply plugin: 'vertx'
 
 repositories {
@@ -16,7 +18,9 @@ repositories {
 }
 
 dependencies {
-  compile("org.gradle:gradle-tooling-api:${toolingApiVersion}")
+  compile("org.gradle:gradle-tooling-api:${toolingApiVersion}") {
+    exclude group: 'org.slf4j', module: 'slf4j-api'
+  }
   compile "com.darylteo:directory-watcher:${watcherVersion}"
 }
 
@@ -27,9 +31,9 @@ vertx {
   }
 
   info {
-    groupId 'com.darylteo'
-    artifactId 'vertx-sentinel'
-    version '0.1.0'
+    groupId project.group
+    artifactId project.name
+    version project.version
   }
 
   config {
@@ -46,8 +50,41 @@ vertx {
     mod {
       config {
         delay 1000
-        tasks 'clean', 'copyMod'
+        tasks 'help', 'copyMod'
       }
+    }
+  }
+}
+
+def release = !project.version.endsWith('-SNAPSHOT')
+
+configurations {
+  archives
+}
+
+artifacts {
+  archives modZip
+}
+
+signing {
+  required { release && gradle.taskGraph.hasTask('uploadArchives') }
+  sign configurations.archives 
+}
+
+uploadArchives {
+  repositories {
+    mavenDeployer {
+      def url = !release ? 'https://oss.sonatype.org/content/repositories/snapshots/' : 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
+      repository(url: url) {
+        authentication(userName: sonatypeUsername, password : sonatypePassword)
+      }
+
+      beforeDeployment { dep ->
+        signing.signPom(dep)
+      }
+      
+      uniqueVersion = false
+      configuration = configurations.archives
     }
   }
 }

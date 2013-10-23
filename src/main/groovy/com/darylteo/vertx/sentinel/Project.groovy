@@ -26,10 +26,16 @@ public class Project {
   }
 
   public void run(Collection taskNames) {
-    this.gBuilder.forTasks(taskNames.collect { name ->
+    def tasks = taskNames.collect { name ->
       this.gProject.tasks.find { task ->
         task.name == name
       }
-    }).run({} as ResultHandler)
+    }
+    
+    tasks = tasks.findAll { task ->
+      task // not null
+    }
+    
+    this.gBuilder.forTasks(tasks).run({} as ResultHandler)
   }
 }

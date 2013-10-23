@@ -69,6 +69,8 @@ public class MainVerticle extends Verticle {
 
 
   private Long setupTimer(long duration) {
-    return vertx.setPeriodic(duration, { watchService.poll() })
+    return vertx.setPeriodic(duration, {
+      watchService.poll()
+    })
   }
 }
